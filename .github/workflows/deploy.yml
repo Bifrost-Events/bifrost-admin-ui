@@ -1,4 +1,5 @@
-# Deploy via Deploy-Admin og ci-templates (SFTP).
+# Deploy via Deploy-Admin og ci-templates (FTP).
+# bifrostevents.no ligger på ProISP hjellum-konto – kun FTP fungerer (ikke SFTP).
 # Krav: GitHub Environment «hjellum-no-bifrostevents» med FTP_*-secrets (synket fra Deploy-Admin).
 name: Deploy
 
@@ -15,7 +16,7 @@ on:
 
 jobs:
   deploy:
-    uses: ./.github/workflows/deploy-admin-sftp-github-secrets.yml
+    uses: ./.github/workflows/deploy-admin-ftp-github-secrets.yml
     permissions:
       contents: read
       deployments: write
@@ -25,5 +26,4 @@ jobs:
       checkout_submodules: false
       composer_install: true
       environments: '["hjellum-no-bifrostevents"]'
-      artifact_suffix: bifrostevents
     secrets: inherit
