@@ -24,7 +24,7 @@ on:
 
 jobs:
   deploy:
-    uses: sjurivar/ci-templates/.github/workflows/deploy-admin-sftp-github-secrets.yml@main
+    uses: ./.github/workflows/deploy-admin-sftp-github-secrets.yml
     permissions:
       contents: read
       deployments: write
