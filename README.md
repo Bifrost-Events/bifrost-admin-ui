@@ -31,6 +31,18 @@ Konfigurer Apache virtual host med document root `bifrost-admin-ui/public` og ho
 
 `BACKEND_API_URL` i `.env` peker til backend (standard: `http://api.bifrost.local`).
 
+## Produksjon (bifrostevents.no)
+
+1. **Document root** i ProISP må peke på `.../bifrostevents/public/` (samme mappe som `index.php` og `.htaccess`).
+2. **FTP deploy** (`FTP_PATH` i GitHub) skal være prosjektroten `.../bifrostevents/` — ikke bare `public/`.
+3. Opprett `.env` på serveren (beskyttet av deploy, overskrives ikke):
+   - `APP_ENV=production`
+   - `APP_DEBUG=false`
+   - `APP_BASE_URL=https://bifrostevents.no`
+   - `BACKEND_API_URL=https://api.bifrostevents.no` (eller faktisk backend-URL)
+
+Uten `.htaccess` i `public/` gir `/login` Apache 404 — front controller kjøres bare for `/` via `DirectoryIndex`.
+
 ## Teste
 
 1. Kjør migrering og seed i backend (se `bifrost-backend/README.md`)
