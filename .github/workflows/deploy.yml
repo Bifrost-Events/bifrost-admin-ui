@@ -1,0 +1,37 @@
+# Deploy via Deploy-Admin og ci-templates (SFTP).
+# Krav: repo registrert i Deploy-Admin, «Synk secrets til GitHub», DEPLOY_ADMIN_APP_KEY som repo secret.
+# Branch/tag → miljø styres i Deploy-Admin (send ref + ref_type til reusable workflow).
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch eller tag
+        required: true
+        default: main
+      ref_type:
+        description: branch eller tag
+        required: true
+        default: branch
+        type: choice
+        options:
+          - branch
+          - tag
+
+jobs:
+  deploy:
+    uses: sjurivar/ci-templates/.github/workflows/deploy-admin-sftp-github-secrets.yml@main
+    permissions:
+      contents: read
+      deployments: write
+    with:
+      ref: ${{ github.event.inputs.ref || github.ref_name }}
+      ref_type: ${{ github.event.inputs.ref_type || github.ref_type }}
+      manifest_path: deploy-manifest.json
+      checkout_submodules: false
+      composer_install: true
+    secrets: inherit
