@@ -1,6 +1,5 @@
-# Deploy via Deploy-Admin og ci-templates (FTP).
-# bifrostevents.no ligger på ProISP hjellum-konto – kun FTP fungerer (ikke SFTP).
-# Krav: GitHub Environment «hjellum-no-bifrostevents» med FTP_*-secrets (synket fra Deploy-Admin).
+# Deploy via Deploy-Admin (FTP). ProISP: r1464744 → bifrost-admin-ui/public/
+# Krav: app_folder=bifrost-admin-ui/, environment hjellum-no-bifrostevents
 name: Deploy
 
 on:

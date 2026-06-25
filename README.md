@@ -33,15 +33,25 @@ Konfigurer Apache virtual host med document root `bifrost-admin-ui/public` og ho
 
 ## Produksjon (bifrostevents.no)
 
-1. **Document root** i ProISP må peke på `.../bifrostevents/public/` (samme mappe som `index.php` og `.htaccess`).
-2. **FTP deploy** (`FTP_PATH` i GitHub) skal være prosjektroten `.../bifrostevents/` — ikke bare `public/`.
-3. Opprett `.env` på serveren (beskyttet av deploy, overskrives ikke):
-   - `APP_ENV=production`
-   - `APP_DEBUG=false`
-   - `APP_BASE_URL=https://bifrostevents.no`
-   - `BACKEND_API_URL=https://api.bifrostevents.no` (eller faktisk backend-URL)
+ProISP kobler **domene → rotmappe** (`webroots/r*`). Flere domener kan peke på samme `r*`, men da deler de samme effektive rot.
 
-Uten `.htaccess` i `public/` gir `/login` Apache 404 — front controller kjøres bare for `/` via `DirectoryIndex`.
+| App | Webroot (`r*`) | Deploy-mappe (`FTP_PATH` / `app_folder`) | ProISP document root |
+|-----|----------------|------------------------------------------|----------------------|
+| Admin UI | `r1464744` | `bifrost-admin-ui/` | `.../r1464744/bifrost-admin-ui/public/` |
+| Backend API | `r1464762` | `bifrost-backend/` | `.../r1464762/bifrost-backend/public/` |
+
+1. **Deploy-Admin:** `app_folder` må være `bifrost-admin-ui/` (ikke `bifrostevents/`). GitHub Environment: `hjellum-no-bifrostevents`.
+2. **ProISP:** `bifrostevents.no` → rot `.../bifrost-admin-ui/public/`.
+3. **`.env` på server** (`bifrost-admin-ui/.env`, beskyttes av deploy):
+
+```env
+APP_ENV=production
+APP_DEBUG=false
+APP_BASE_URL=https://bifrostevents.no
+BACKEND_API_URL=https://api.bifrostevents.no
+```
+
+Uten `.htaccess` i `public/` gir `/login` Apache 404.
 
 ## Teste
 
