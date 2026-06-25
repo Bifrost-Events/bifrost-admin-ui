@@ -1,5 +1,5 @@
-# Deploy via Deploy-Admin (FTP). ProISP: r1464744 → bifrost-admin-ui/public/
-# Krav: app_folder=bifrost-admin-ui/, environment hjellum-no-bifrostevents
+# Deploy via Deploy-Admin (FTP). ProISP: r1464744 → bifrostadminui/public/
+# Krav: app_folder=bifrostadminui/ (uten bindestrek – ProISP), environment hjellum-no-bifrostevents
 name: Deploy
 
 on:

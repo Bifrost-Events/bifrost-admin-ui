@@ -35,14 +35,16 @@ Konfigurer Apache virtual host med document root `bifrost-admin-ui/public` og ho
 
 ProISP kobler **domene → rotmappe** (`webroots/r*`). Flere domener kan peke på samme `r*`, men da deler de samme effektive rot.
 
-| App | Webroot (`r*`) | Deploy-mappe (`FTP_PATH` / `app_folder`) | ProISP document root |
-|-----|----------------|------------------------------------------|----------------------|
-| Admin UI | `r1464744` | `bifrost-admin-ui/` | `.../r1464744/bifrost-admin-ui/public/` |
-| Backend API | `r1464762` | `bifrost-backend/` | `.../r1464762/bifrost-backend/public/` |
+| App | Webroot (`r*`) | Deploy-mappe (`app_folder`) | ProISP document root |
+|-----|----------------|----------------------------|----------------------|
+| Admin UI | `r1464744` | `bifrostadminui/` | `.../r1464744/bifrostadminui/public/` |
+| Backend API | `r1464762` | `bifrostbackend/` | `.../r1464762/bifrostbackend/public/` |
 
-1. **Deploy-Admin:** `app_folder` må være `bifrost-admin-ui/` (ikke `bifrostevents/`). GitHub Environment: `hjellum-no-bifrostevents`.
-2. **ProISP:** `bifrostevents.no` → rot `.../bifrost-admin-ui/public/`.
-3. **`.env` på server** (`bifrost-admin-ui/.env`, beskyttes av deploy):
+ProISP tillater ikke bindestrek (`-`) i mappenavn på serveren.
+
+1. **Deploy-Admin:** `app_folder` = `bifrostadminui/`. GitHub Environment: `hjellum-no-bifrostevents`.
+2. **ProISP:** `bifrostevents.no` → rot `.../bifrostadminui/public/`.
+3. **`.env` på server** (`bifrostadminui/.env`, beskyttes av deploy):
 
 ```env
 APP_ENV=production
