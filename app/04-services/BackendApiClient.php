@@ -421,19 +421,107 @@ final class BackendApiClient
      */
     private function request(string $method, string $path, ?array $body = null): array
     {
-        $baseUrl = (string) Config::get('backend.api_base_url', '');
-        if ($baseUrl === '') {
+        try {
+            $baseUrl = rtrim((string) Config::get('backend.api_base_url', ''), '/');
+            if ($baseUrl === '') {
+                return [
+                    'ok' => false,
+                    'status' => 0,
+                    'data' => null,
+                    'error' => 'BACKEND_API_URL is not configured',
+                ];
+            }
+
+            $url = $baseUrl . $path;
+            $cookie = Session::getBackendCookie();
+
+            if (function_exists('curl_init')) {
+                return $this->decodeResponse($this->requestViaCurl($url, $method, $body, $cookie));
+            }
+
+            return $this->decodeResponse($this->requestViaStream($url, $method, $body, $cookie));
+        } catch (\Throwable $e) {
             return [
                 'ok' => false,
                 'status' => 0,
                 'data' => null,
-                'error' => 'BACKEND_API_URL is not configured',
+                'error' => 'Backend request failed: ' . $e->getMessage(),
             ];
         }
+    }
 
-        $url = $baseUrl . $path;
+    /**
+     * @param array<string, mixed>|null $body
+     * @return array{status: int, body: string|false, headers: list<string>}
+     */
+    private function requestViaCurl(string $url, string $method, ?array $body, string $cookie): array
+    {
+        $ch = curl_init($url);
+        if ($ch === false) {
+            throw new \RuntimeException('curl_init failed');
+        }
+
+        $headerLines = ['Accept: application/json'];
+        if ($cookie !== '') {
+            $headerLines[] = 'Cookie: ' . $cookie;
+        }
+
+        $payload = null;
+        if ($body !== null) {
+            $payload = json_encode($body, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+            $headerLines[] = 'Content-Type: application/json';
+        }
+
+        $responseHeaders = [];
+        curl_setopt_array($ch, [
+            CURLOPT_CUSTOMREQUEST => $method,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => false,
+            CURLOPT_HTTPHEADER => $headerLines,
+            CURLOPT_TIMEOUT => 12,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 3,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_HEADERFUNCTION => static function ($curl, string $headerLine) use (&$responseHeaders) {
+                $trimmed = trim($headerLine);
+                if ($trimmed !== '') {
+                    $responseHeaders[] = $trimmed;
+                }
+
+                return strlen($headerLine);
+            },
+        ]);
+
+        if ($payload !== null) {
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        }
+
+        $responseBody = curl_exec($ch);
+        $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+        if ($responseBody === false) {
+            $err = curl_error($ch);
+            curl_close($ch);
+            throw new \RuntimeException($err !== '' ? $err : 'curl_exec failed');
+        }
+
+        curl_close($ch);
+        self::$lastResponseHeaders = $responseHeaders;
+
+        return [
+            'status' => $status,
+            'body' => $responseBody,
+            'headers' => $responseHeaders,
+        ];
+    }
+
+    /**
+     * @param array<string, mixed>|null $body
+     * @return array{status: int, body: string|false, headers: list<string>}
+     */
+    private function requestViaStream(string $url, string $method, ?array $body, string $cookie): array
+    {
         $headers = "Accept: application/json\r\n";
-        $cookie = Session::getBackendCookie();
         if ($cookie !== '') {
             $headers .= 'Cookie: ' . $cookie . "\r\n";
         }
@@ -451,22 +539,50 @@ final class BackendApiClient
             $options['content'] = $payload;
         }
 
-        $context = stream_context_create(['http' => $options]);
+        $context = stream_context_create([
+            'http' => $options,
+            'ssl' => [
+                'verify_peer' => true,
+                'verify_peer_name' => true,
+            ],
+        ]);
+
         self::$lastResponseHeaders = null;
         $responseBody = @file_get_contents($url, false, $context);
-        self::$lastResponseHeaders = $http_response_header ?? null;
+        /** @var list<string> $rawHeaders */
+        $rawHeaders = isset($http_response_header) && is_array($http_response_header) ? $http_response_header : [];
+        self::$lastResponseHeaders = $rawHeaders;
 
         $status = 0;
-        if (isset($http_response_header[0]) && preg_match('#\s(\d{3})\s#', $http_response_header[0], $m)) {
+        if (isset(self::$lastResponseHeaders[0]) && preg_match('#\s(\d{3})\s#', self::$lastResponseHeaders[0], $m)) {
             $status = (int) $m[1];
         }
 
         if ($responseBody === false) {
+            throw new \RuntimeException('Could not reach backend at ' . $url);
+        }
+
+        return [
+            'status' => $status,
+            'body' => $responseBody,
+            'headers' => self::$lastResponseHeaders,
+        ];
+    }
+
+    /**
+     * @param array{status: int, body: string|false, headers: list<string>} $transport
+     * @return array{ok: bool, status: int, data: array<string, mixed>|null, error: string|null, errors?: array<string, string>}
+     */
+    private function decodeResponse(array $transport): array
+    {
+        $status = $transport['status'];
+        $responseBody = $transport['body'];
+        if (!is_string($responseBody) || $responseBody === '') {
             return [
                 'ok' => false,
                 'status' => $status,
                 'data' => null,
-                'error' => 'Could not reach backend at ' . $url,
+                'error' => 'Empty response from backend',
             ];
         }
 

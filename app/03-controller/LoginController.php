@@ -47,6 +47,10 @@ final class LoginController
 
         if (!($result['ok'] ?? false)) {
             $message = (string) ($result['error'] ?? 'Innlogging feilet.');
+            if (str_contains(strtolower($message), 'could not reach backend')
+                || str_contains(strtolower($message), 'backend request failed')) {
+                $message = 'Kunne ikke nå backend API. Sjekk BACKEND_API_URL i .env (skal være https://api.bifrostevents.no).';
+            }
             if (str_contains(strtolower($message), 'invalid email or password')) {
                 $message = 'Ugyldig e-post eller passord.';
             }
