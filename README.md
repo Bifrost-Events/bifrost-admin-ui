@@ -105,6 +105,8 @@ Deltakerprofiler (`event_participant_profiles`) er ikke adminroller og vises ikk
   - Domener — per cup, legg til/rediger/fjern (`public`, `admin`, `api`, `organizer`)
   - Brukere — liste, detaljer, opprett, rediger, deaktiver, `first_registered_tenant`
   - Roller og tilganger — SystemAdmin, CupAdmin, planlagt Organizer
+- **Sesonger** under Cup-oppsett
+- **Cup Experience** — informativ side om managed cup-config (ingen redigering ennå)
 - Placeholder-sider for øvrige menypunkter (se `config/admin-menu.php`)
 
 ### Plattform-sider
@@ -115,3 +117,9 @@ Deltakerprofiler (`event_participant_profiles`) er ikke adminroller og vises ikk
 | Domener | http://admin.bifrost.local/platform/domains |
 | Brukere | http://admin.bifrost.local/platform/users |
 | Roller | http://admin.bifrost.local/platform/roles |
+
+### Cup Experience (managed config)
+
+Under **Cup-oppsett → Cup Experience** forklares at store cuper settes opp som JSON i `bifrost-public-ui/config/cups/`, ikke via admin-editor ennå. Siden lister managed cup-filer hvis public-ui-repoet er tilgjengelig i workspace.
+
+Host-mapping og sponsorflater dokumenteres i `bifrost-public-ui/README.md` og `bifrost-shared/reference/cup-experience.md`.

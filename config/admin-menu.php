@@ -77,6 +77,13 @@ return [
                     'description' => 'Sesonger og cup-struktur for valgt tenant.',
                 ],
                 [
+                    'id' => 'cup.experience',
+                    'label' => 'Cup Experience',
+                    'path' => '/cup/experience',
+                    'title' => 'Cup Experience',
+                    'description' => 'Managed cup-profil, layout og sponsoroppsett (JSON-config i public-ui).',
+                ],
+                [
                     'id' => 'cup.classes',
                     'label' => 'Klasser',
                     'path' => '/cup/classes',

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Controller\CupExperienceController;
 use App\Controller\CupSeasonsController;
 use App\Controller\AdminPageController;
 use App\Controller\HomeController;
@@ -22,6 +23,7 @@ return function (array $app): Router {
     $roles = new PlatformRolesController();
     $organizations = new PlatformOrganizationsController();
     $cupSeasons = new CupSeasonsController();
+    $cupExperience = new CupExperienceController();
 
     $router->get('/login', fn () => $login->showForm());
     $router->post('/login', fn () => $login->submit());
@@ -72,6 +74,7 @@ return function (array $app): Router {
     $router->post('/platform/organizations/{id}/members/{memberId}/delete', fn (int $id, int $memberId) => $organizations->removeMember($id, $memberId));
 
     $router->get('/cup/seasons', fn () => $cupSeasons->index());
+    $router->get('/cup/experience', fn () => $cupExperience->index());
     $router->post('/cup/seasons', fn () => $cupSeasons->createSeason());
     $router->post('/cup/seasons/rounds', fn () => $cupSeasons->createRoundFromPost());
     $router->post('/cup/seasons/{id}/cup-standings', fn (int $id) => $cupSeasons->updateCupStandings($id));
@@ -83,6 +86,7 @@ return function (array $app): Router {
         '/platform/roles',
         '/platform/organizations',
         '/cup/seasons',
+        '/cup/experience',
     ];
 
     foreach (AdminMenu::allPages() as $page) {
