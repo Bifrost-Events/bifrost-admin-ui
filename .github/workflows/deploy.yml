@@ -15,7 +15,7 @@ on:
 
 jobs:
   deploy:
-    uses: ./.github/workflows/deploy-admin-ftp-github-secrets.yml
+    uses: sjurivar/ci-templates/.github/workflows/deploy-admin-ftp-github-secrets.yml@v7
     permissions:
       contents: read
       deployments: write
