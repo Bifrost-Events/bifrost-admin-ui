@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Controller\CupExperienceController;
 use App\Controller\CupSeasonsController;
 use App\Controller\AdminPageController;
+use App\Controller\HealthController;
 use App\Controller\HomeController;
 use App\Controller\LoginController;
 use App\Controller\PlatformOrganizationsController;
@@ -28,6 +29,7 @@ return function (array $app): Router {
     $router->get('/login', fn () => $login->showForm());
     $router->post('/login', fn () => $login->submit());
     $router->post('/logout', fn () => $login->logout());
+    $router->get('/health', fn () => (new HealthController())());
     $router->get('/', fn () => (new HomeController())());
 
     $router->get('/platform/cuper', fn () => $tenants->indexCups());
